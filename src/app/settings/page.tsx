@@ -1,0 +1,200 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { ArrowLeft, Save, Loader2, ShieldCheck, Database, Building2, Key, Info } from "lucide-react";
+
+export default function SettingsPage() {
+  const [mounted, setMounted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState({
+    satusehat_client_id: "",
+    satusehat_client_secret: "",
+    satusehat_organization_id: "",
+    pharmacy_name: "Apotek Modern",
+    pharmacy_address: "",
+  });
+
+  useEffect(() => {
+    setMounted(true);
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch("/api/settings");
+      if (res.ok) {
+        const data = await res.json();
+        setSettings(prev => ({ ...prev, ...data }));
+      }
+    } catch (error) {
+      console.error("Failed to fetch settings:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings }),
+      });
+
+      if (res.ok) {
+        alert("Pengaturan berhasil disimpan.");
+      } else {
+        const error = await res.json();
+        alert(`Gagal menyimpan: ${error.error}`);
+      }
+    } catch (error: any) {
+      alert(`Terjadi kesalahan: ${error.message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setSettings(prev => ({ ...prev, [name]: value }));
+  };
+
+  if (!mounted || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="animate-spin text-blue-600" size={40} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-4xl mx-auto">
+        <header className="flex justify-between items-center mb-10">
+          <div className="flex items-center gap-4">
+            <Link 
+              href="/" 
+              className="p-2 rounded-lg bg-white border border-gray-200 text-gray-500 hover:text-blue-600 transition"
+            >
+              <ArrowLeft size={20} />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Pengaturan Sistem</h1>
+              <p className="text-sm text-gray-500">Konfigurasi integrasi dan identitas apotek</p>
+            </div>
+          </div>
+          <button 
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 font-medium disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+            Simpan Perubahan
+          </button>
+        </header>
+
+        <form onSubmit={handleSave} className="space-y-8">
+          {/* Card: SatuSehat */}
+          <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-100 text-blue-600">
+                <ShieldCheck size={20} />
+              </div>
+              <h2 className="font-bold text-gray-900">Kredensial SatuSehat Kemenkes</h2>
+            </div>
+            <div className="p-8 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Key size={14} className="text-gray-400" />
+                    Client ID
+                  </label>
+                  <input 
+                    type="text" 
+                    name="satusehat_client_id"
+                    value={settings.satusehat_client_id}
+                    onChange={handleChange}
+                    placeholder="Masukkan Client ID" 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Key size={14} className="text-gray-400" />
+                    Client Secret
+                  </label>
+                  <input 
+                    type="password" 
+                    name="satusehat_client_secret"
+                    value={settings.satusehat_client_secret}
+                    onChange={handleChange}
+                    placeholder="••••••••••••••••" 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <Building2 size={14} className="text-gray-400" />
+                  Organization ID
+                </label>
+                <input 
+                  type="text" 
+                  name="satusehat_organization_id"
+                  value={settings.satusehat_organization_id}
+                  onChange={handleChange}
+                  placeholder="ID Organisasi (contoh: 1000252)" 
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+              <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-xl text-blue-700 text-sm">
+                <Info className="flex-shrink-0 mt-0.5" size={18} />
+                <p>
+                  Kredensial ini digunakan untuk autentikasi ke platform SatuSehat. Pastikan Anda menggunakan Client ID dan Secret untuk lingkungan (Environment) yang sesuai (Sandbox atau Production).
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Card: Profile */}
+          <section className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-green-100 text-green-600">
+                <Database size={20} />
+              </div>
+              <h2 className="font-bold text-gray-900">Profil Apotek</h2>
+            </div>
+            <div className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Nama Apotek</label>
+                <input 
+                  type="text" 
+                  name="pharmacy_name"
+                  value={settings.pharmacy_name}
+                  onChange={handleChange}
+                  placeholder="Nama Apotek Anda" 
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Alamat Lengkap</label>
+                <textarea 
+                  name="pharmacy_address"
+                  value={settings.pharmacy_address}
+                  onChange={handleChange}
+                  rows={3}
+                  placeholder="Alamat lengkap apotek..." 
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-none"
+                />
+              </div>
+            </div>
+          </section>
+        </form>
+      </div>
+    </div>
+  );
+}
