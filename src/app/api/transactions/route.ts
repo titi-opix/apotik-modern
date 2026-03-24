@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       paymentMethod 
     } = body;
 
-    // Use a transaction to ensure atomic operations
+    // Use a transaction to ensure atomic operations with a higher timeout
     const result = await prisma.$transaction(async (tx) => {
       // 1. Find or create patient
       let patient = null;
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
           where: {
             productId: item.id,
             currentQuantity: { gt: 0 },
-            expiryDate: { gt: new Date() }, // Hanya ambil yang belum kedaluwarsa
+            expiryDate: { gt: new Date() },
           },
           orderBy: { expiryDate: "asc" },
         });
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
         });
       }
 
-      // 4. Fetch the full transaction with patient data for the receipt
+      // 4. Fetch the full transaction with patient data
       const fullTransaction = await tx.transaction.findUnique({
         where: { id: transaction.id },
         include: { patient: true }
@@ -114,8 +114,11 @@ export async function POST(request: Request) {
 
       return {
         ...fullTransaction,
-        patientName: fullTransaction?.patient?.name // Flatten for easier access
+        patientName: fullTransaction?.patient?.name
       };
+    }, {
+      maxWait: 10000, // Wait for a connection up to 10s
+      timeout: 30000, // Complete transaction within 30s
     });
 
     // Mock SatuSehat RME Integration
