@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { 
@@ -34,7 +34,8 @@ interface POItem {
   price: number; // Purchase price
 }
 
-export default function NewPOPage() {
+// Sub-component to handle search params
+function NewPOContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialPbfId = searchParams.get("pbfId");
@@ -71,16 +72,16 @@ export default function NewPOPage() {
 
   const addToCart = (product: Product) => {
     if (cart.find(item => item.productId === product.id)) return;
-    setCart([...cart, { 
-      productId: product.id, 
-      productName: product.name, 
-      quantity: 1, 
+    setCart([...cart, {
+      productId: product.id,
+      productName: product.name,
+      quantity: 1,
       price: product.price * 0.8 // Default estimate: 80% of sale price
     }]);
   };
 
   const updateItem = (productId: string, field: 'quantity' | 'price', value: number) => {
-    setCart(prev => prev.map(item => 
+    setCart(prev => prev.map(item =>
       item.productId === productId ? { ...item, [field]: value } : item
     ));
   };
@@ -136,7 +137,7 @@ export default function NewPOPage() {
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Lengkapi daftar pengadaan obat</p>
           </div>
         </div>
-        <button 
+        <button
           onClick={handleSave}
           disabled={isSaving || cart.length === 0}
           className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition flex items-center gap-2 shadow-lg shadow-blue-100 disabled:opacity-50"
@@ -147,14 +148,14 @@ export default function NewPOPage() {
       </header>
 
       <main className="p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 outline-none">
-        
+
         {/* Left: Product Selection */}
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col h-[600px]">
             <div className="flex items-center gap-2 mb-6">
               <Search className="text-gray-400" size={18} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Cari obat untuk dipesan..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -169,7 +170,7 @@ export default function NewPOPage() {
                     <p className="text-sm font-bold text-gray-700 truncate">{p.name}</p>
                     <p className="text-[10px] text-gray-400">Harga Jual: Rp {p.price.toLocaleString()}</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => addToCart(p)}
                     className="p-2 bg-white text-blue-600 rounded-lg border border-blue-100 group-hover:bg-blue-600 group-hover:text-white transition"
                   >
@@ -189,7 +190,7 @@ export default function NewPOPage() {
               <Truck size={16} />
               Pilih Distributor (PBF)
             </div>
-            <select 
+            <select
               value={selectedPbf}
               onChange={(e) => setSelectedPbf(e.target.value)}
               className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 font-bold text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 transition"
@@ -226,7 +227,7 @@ export default function NewPOPage() {
                       <div className="flex gap-4">
                         <div className="flex-1">
                           <label className="text-[9px] font-black text-gray-400 uppercase ml-1">Jumlah</label>
-                          <input 
+                          <input
                             type="number"
                             min="1"
                             value={item.quantity}
@@ -236,7 +237,7 @@ export default function NewPOPage() {
                         </div>
                         <div className="flex-[2]">
                           <label className="text-[9px] font-black text-gray-400 uppercase ml-1">Harga Beli Est. (Rp)</label>
-                          <input 
+                          <input
                             type="number"
                             min="0"
                             value={item.price}
@@ -246,7 +247,7 @@ export default function NewPOPage() {
                         </div>
                       </div>
                     </div>
-                    <button 
+                    <button
                       onClick={() => removeItem(item.productId)}
                       className="p-3 text-red-300 hover:text-red-500 transition"
                     >
@@ -272,5 +273,14 @@ export default function NewPOPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+// Main Page Component
+export default function NewPOPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" /></div>}>
+      <NewPOContent />
+    </Suspense>
   );
 }

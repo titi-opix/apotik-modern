@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  BarChart3, 
-  Database, 
-  DollarSign, 
-  FileSpreadsheet, 
-  FileText, 
-  LayoutDashboard, 
-  Package, 
-  Settings, 
-  ShoppingCart, 
-  Truck, 
+import {
+  BarChart3,
+  Database,
+  DollarSign,
+  FileSpreadsheet,
+  FileText,
+  LayoutDashboard,
+  Package,
+  Settings,
+  ShoppingCart,
+  Truck,
   Users,
   ShieldCheck
 } from "lucide-react";
@@ -56,20 +56,20 @@ export function Sidebar() {
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative",
-                  isActive 
-                    ? "bg-blue-50 text-blue-700 font-bold" 
+                  isActive
+                    ? "bg-blue-50 text-blue-700 font-bold"
                     : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                 )}
               >
                 {isActive && (
                   <div className="absolute left-0 w-1 h-6 bg-blue-600 rounded-r-full" />
                 )}
-                <item.icon 
-                  size={20} 
+                <item.icon
+                  size={20}
                   className={cn(
                     "transition-colors",
                     isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-600"
-                  )} 
+                  )}
                 />
                 <span className="text-sm tracking-tight">{item.label}</span>
               </Link>
@@ -77,7 +77,7 @@ export function Sidebar() {
           })}
         </nav>
       </div>
-      
+
       <div className="mt-auto p-8">
         <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Pharmacy Intelligence</p>
