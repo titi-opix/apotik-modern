@@ -10,14 +10,17 @@ import {
   Search, 
   BarChart3, 
   ShieldCheck,
-  Database,
-  Loader2,
-  Settings
+  TrendingUp,
+  AlertCircle,
+  Plus,
+  FileText,
+  Clock,
+  CheckCircle2,
+  ArrowUpRight,
+  Download
 } from "lucide-react";
 
-
 export default function Home() {
-  const [seeding, setSeeding] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -25,185 +28,250 @@ export default function Home() {
   }, []);
 
   const stats = [
-    { label: "Total Obat", value: "1,234", icon: Package, color: "text-blue-600" },
-    { label: "Transaksi Hari Ini", value: "48", icon: ShoppingCart, color: "text-green-600" },
-    { label: "Stok Rendah", value: "12", icon: Activity, color: "text-orange-600" },
-    { label: "Pelanggan Baru", value: "15", icon: Users, color: "text-purple-600" },
+    { 
+      label: "TOTAL OBAT", 
+      value: "1,284", 
+      icon: Package, 
+      color: "bg-blue-50 text-blue-600",
+      trend: "+12.5%",
+      trendColor: "bg-green-100 text-green-700",
+      href: "/inventory"
+    },
+    { 
+      label: "TRANSAKSI HARI INI", 
+      value: "48", 
+      icon: ShoppingCart, 
+      color: "bg-indigo-50 text-indigo-600",
+      status: "Up to date",
+      statusColor: "bg-blue-50 text-blue-600",
+      href: "/pos"
+    },
+    { 
+      label: "STOK RENDAH", 
+      value: "18", 
+      icon: AlertCircle, 
+      color: "bg-red-50 text-red-600 border-l-4 border-red-500",
+      status: "Critical",
+      statusColor: "bg-red-100 text-red-700",
+      href: "/inventory"
+    },
+    { 
+      label: "PELANGGAN BARU", 
+      value: "12", 
+      icon: Users, 
+      color: "bg-green-50 text-green-600",
+      status: "New",
+      statusColor: "bg-green-100 text-green-700",
+      href: "/pos" // Assuming customers are managed or seen in POS/Sales
+    },
   ];
 
-  const handleSeed = async () => {
-    setSeeding(true);
-    try {
-      const res = await fetch("/api/seed");
-      const data = await res.json();
-      if (res.ok) {
-        alert("Basis data berhasil diinisialisasi!");
-        window.location.href = "/inventory";
-      } else {
-        alert(`Gagal: ${data.error || "Unknown server error"}`);
-      }
-    } catch (error: any) {
-      alert(`Terjadi kesalahan: ${error.message}`);
-    } finally {
-      setSeeding(false);
+  const recentActivities = [
+    {
+      type: "stock",
+      title: "Penerimaan Stok Baru",
+      desc: "Paracetamol 500mg (10 Box)",
+      time: "10 Menit Lalu",
+      user: "Suster Maria",
+      icon: Package,
+      iconColor: "bg-blue-50 text-blue-600"
+    },
+    {
+      type: "alert",
+      title: "Alert: Stok Kritis",
+      desc: "Amoxicillin tinggal 5 strip tersisa.",
+      time: "45 Menit Lalu",
+      user: "Sistem Otomatis",
+      icon: AlertCircle,
+      iconColor: "bg-red-50 text-red-600"
+    },
+    {
+      type: "sale",
+      title: "Penjualan Berhasil",
+      desc: "Order #882190 - Rp 450.000",
+      time: "1 Jam Lalu",
+      user: "Dr. Sarah",
+      icon: ShoppingCart,
+      iconColor: "bg-green-50 text-green-600"
+    },
+    {
+      type: "po",
+      title: "Surat Pesanan Dibuat",
+      desc: "PBF Kimia Farma - 8 item",
+      time: "2 Jam Lalu",
+      user: "Sistem",
+      icon: FileText,
+      iconColor: "bg-slate-50 text-slate-600"
     }
-  };
+  ];
 
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="animate-spin text-blue-600" size={40} />
-      </div>
-    );
-  }
+  if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <header className="flex justify-between items-center mb-10">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Apotek Modern Dashboard</h1>
-            <p className="text-gray-500 mt-1">Sistem Manajemen Obat & Alkes Terintegrasi</p>
-          </div>
-          <div className="flex gap-4">
-            <button 
-              onClick={handleSeed}
-              disabled={seeding}
-              className="bg-orange-100 text-orange-700 px-4 py-2 rounded-lg hover:bg-orange-200 transition flex items-center gap-2 font-medium"
-            >
-              {seeding ? <Loader2 className="animate-spin" size={20} /> : <Database size={20} />}
-              Inisialisasi Data
-            </button>
-            <Link 
-              href="/inventory" 
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
-            >
-              <Package size={20} />
-              Kelola Stok
-            </Link>
-            <Link 
-              href="/pos" 
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2"
-            >
-              <ShoppingCart size={20} />
-              Kasir (POS)
-            </Link>
-            <Link 
-              href="/settings" 
-              className="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-50 transition flex items-center gap-2"
-            >
-              <Settings size={20} />
-              Pengaturan
-            </Link>
-          </div>
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Top Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, i) => (
+          <Link 
+            key={i} 
+            href={stat.href}
+            className={`p-6 rounded-[2rem] bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all relative overflow-hidden group ${stat.color.includes('border-red-500') ? 'border-l-4 border-red-500' : ''}`}
+          >
+             <div className="flex justify-between items-start">
+               <div className={`p-4 rounded-2xl ${stat.color} group-hover:scale-110 transition-transform`}>
+                 <stat.icon size={24} />
+               </div>
+               {stat.trend && (
+                 <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest ${stat.trendColor}`}>
+                   {stat.trend}
+                 </span>
+               )}
+               {stat.status && (
+                 <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest ${stat.statusColor}`}>
+                   {stat.status}
+                 </span>
+               )}
+             </div>
+             <div className="mt-6">
+               <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{stat.label}</p>
+               <p className="text-3xl font-black text-gray-900 mt-1 tracking-tight">{stat.value}</p>
+             </div>
+             <div className="absolute top-2 right-2 text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+               <ArrowUpRight size={16} />
+             </div>
+          </Link>
+        ))}
+      </div>
 
-        </header>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          {stats.map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-                  <p className="text-2xl font-bold mt-2 text-gray-900">{stat.value}</p>
-                </div>
-                <div className={`p-3 rounded-lg bg-gray-50 ${stat.color}`}>
-                  <stat.icon size={24} />
-                </div>
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Chart Card */}
+        <div className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center mb-10">
+            <div>
+              <h2 className="text-xl font-black text-gray-900 tracking-tight">Insight Penjualan</h2>
+              <p className="text-xs text-gray-400 font-bold mt-1">Laporan performa apotek 7 hari terakhir</p>
             </div>
-          ))}
+            <div className="flex bg-gray-50 p-1 rounded-xl">
+              <button className="px-4 py-2 text-xs font-bold text-gray-400 hover:text-gray-900 transition">Mingguan</button>
+              <button className="px-6 py-2 text-xs font-bold bg-blue-600 text-white rounded-lg shadow-lg shadow-blue-100">Bulanan</button>
+            </div>
+          </div>
+
+          <div className="h-64 flex items-end justify-between gap-4 px-4">
+            {[30, 60, 45, 85, 55, 45, 100].map((h, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center gap-4 group">
+                <div className="relative w-full">
+                   {i === 6 && (
+                     <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg">
+                       Rp 10.4M
+                     </div>
+                   )}
+                   <div 
+                    className={`w-full rounded-t-2xl transition-all duration-500 cursor-pointer ${
+                      i === 3 ? "bg-emerald-400" : i === 6 ? "bg-blue-900" : "bg-blue-200 group-hover:bg-blue-300"
+                    }`}
+                    style={{ height: `${h * 1.5}px` }}
+                  />
+                </div>
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"][i]}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Quick Actions & Integrations */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                <ShieldCheck className="text-blue-600" />
-                Integrasi Regulasi (Kemenkes)
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Link href="/inventory" className="p-4 rounded-lg border border-gray-200 hover:border-blue-300 transition group cursor-pointer">
-                  <h3 className="font-bold text-blue-700">KFA Browser</h3>
-                  <p className="text-sm text-gray-500 mt-1">Pencarian obat standar SatuSehat</p>
-                </Link>
-                <Link href="/compliance" className="p-4 rounded-lg border border-gray-200 hover:border-green-300 transition group cursor-pointer">
-                  <h3 className="font-bold text-green-700">SIPNAP Report</h3>
-                  <p className="text-sm text-gray-500 mt-1">Laporan otomatis Narkotika & Psikotropika</p>
-                </Link>
-                <Link href="/compliance" className="p-4 rounded-lg border border-gray-200 hover:border-purple-300 transition group cursor-pointer">
-                  <h3 className="font-bold text-purple-700">SIMONA</h3>
-                  <p className="text-sm text-gray-500 mt-1">Sinkronisasi data Obat & Alkes</p>
-                </Link>
-              </div>
-            </section>
-
-            <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                <Activity className="text-orange-600" />
-                Aktivitas Terbaru
-              </h2>
-              <div className="space-y-4">
-                {[1, 2, 3].map((_, i) => (
-                  <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
-                        P
-                      </div>
-                      <div>
-                        <p className="font-medium">Paracetamol 500mg (10 Box)</p>
-                        <p className="text-xs text-gray-500">Transaksi #INV-2024-001 • 5 menit yang lalu</p>
-                      </div>
-                    </div>
-                    <span className="text-sm font-semibold text-green-600">+Rp 150.000</span>
-                  </div>
-                ))}
-              </div>
-            </section>
+        {/* Recent Activity */}
+        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-xl font-black text-gray-900 tracking-tight">Aktivitas Terbaru</h2>
+            <Link href="/reports" className="text-xs font-bold text-blue-600 hover:underline">Lihat Semua</Link>
           </div>
 
-          <div className="space-y-8">
-            <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                <Search className="text-gray-400" />
-                Cari Obat (KFA)
-              </h2>
-              <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="Masukkan kode KFA atau nama obat..." 
-                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                />
-                <Search className="absolute left-3 top-3.5 text-gray-400" size={18} />
+          <div className="flex-1 space-y-6">
+            {recentActivities.map((act, i) => (
+              <div key={i} className="flex gap-4 group cursor-pointer">
+                <div className={`w-12 h-12 rounded-2xl ${act.iconColor} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+                  <act.icon size={20} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-black text-gray-900 tracking-tight">{act.title}</h4>
+                  <p className="text-xs text-gray-400 font-bold mt-0.5 line-clamp-1">{act.desc}</p>
+                  <p className="text-[10px] text-gray-300 font-bold mt-2 flex items-center gap-2">
+                    <Clock size={10} />
+                    {act.time} • Oleh {act.user}
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-gray-500 mt-3 italic">
-                Pencarian terintegrasi dengan SatuSehat KFA Browser
-              </p>
-            </section>
+            ))}
+          </div>
 
-            <section className="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-xl shadow-lg text-white">
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                <BarChart3 />
-                Insight Penjualan
-              </h2>
-              <div className="mt-6 h-32 flex items-end gap-2">
-                {[40, 70, 45, 90, 65, 80, 55].map((h, i) => (
-                  <div 
-                    key={i} 
-                    className="flex-1 bg-white/20 rounded-t-md hover:bg-white/40 transition-all cursor-pointer" 
-                    style={{ height: `${h}%` }}
-                  />
-                ))}
+          <div className="mt-8 pt-8 border-t border-gray-50">
+            <div className="bg-blue-50/50 p-6 rounded-3xl relative overflow-hidden group">
+              <div className="relative z-10">
+                <h4 className="text-sm font-black text-blue-900">Review Bulanan</h4>
+                <p className="text-xs text-blue-700 font-medium mt-1 leading-relaxed">Laporan kinerja apotek periode Oktober sudah siap.</p>
+                <button 
+                  onClick={() => window.open("/reports/monthly/oktober", "_blank")}
+                  className="mt-4 w-full bg-blue-900 text-white py-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 hover:bg-black transition shadow-lg active:scale-95 text-center"
+                >
+                  <Download size={14} />
+                  Download PDF
+                </button>
               </div>
-              <p className="text-sm mt-4 text-blue-100">
-                Penjualan naik 12% dibandingkan minggu lalu
-              </p>
-            </section>
+              <TrendingUp className="absolute -bottom-2 -right-2 text-blue-100 -rotate-12 group-hover:scale-125 transition-transform" size={80} />
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Integration Section */}
+      <section className="space-y-6">
+        <h2 className="text-xl font-black text-gray-900 tracking-tight">Integrasi Regulasi</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { 
+              title: "KFA Browser", 
+              desc: "Kamus Farmasi & Alat Kesehatan Indonesia Resmi Kemenkes.", 
+              color: "text-blue-600",
+              bgColor: "bg-blue-50/50",
+              href: "https://satusehat.kemkes.go.id/kfa-browser",
+              isExternal: true
+            },
+            { 
+              title: "SIPNAP Report", 
+              desc: "Pelaporan Narkotika & Psikotropika otomatis ke sistem nasional.", 
+              color: "text-emerald-600",
+              bgColor: "bg-emerald-50/50",
+              href: "/compliance"
+            },
+            { 
+              title: "SIMONA", 
+              desc: "Sistem Monitoring Advokasi Tenaga Kefarmasian terintegrasi.", 
+              color: "text-orange-600",
+              bgColor: "bg-orange-50/50",
+              href: "/compliance"
+            }
+          ].map((card, i) => (
+            <Link 
+              key={i} 
+              href={card.href}
+              {...(card.isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              className="p-8 rounded-[2.5rem] bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 cursor-pointer group"
+            >
+              <div className={`w-12 h-12 rounded-2xl ${card.bgColor} ${card.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                <Search size={24} />
+              </div>
+              <h3 className={`text-lg font-black tracking-tight ${card.color}`}>{card.title}</h3>
+              <p className="text-xs text-gray-400 font-bold mt-2 leading-relaxed">{card.desc}</p>
+              <div className="mt-6 flex items-center gap-2 text-[10px] font-black text-gray-300 uppercase tracking-widest group-hover:text-gray-900 transition-colors">
+                Buka Modul
+                <ArrowUpRight size={14} />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

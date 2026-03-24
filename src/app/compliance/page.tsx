@@ -7,9 +7,16 @@ import { ArrowLeft, FileCheck, ShieldCheck, Database, Send, CheckCircle2, Loader
 export default function CompliancePage() {
   const [mounted, setMounted] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const today = new Date().toLocaleDateString('id-ID', { 
+    day: '2-digit', 
+    month: 'long', 
+    year: 'numeric',
+    timeZone: 'Asia/Jayapura'
+  });
+
   const [lastReports, setLastReports] = useState<Record<string, string>>({
-    sipnap: "01 Maret 2026",
-    simona: "20 Maret 2026",
+    sipnap: today,
+    simona: today,
     satusehat: "Real-time",
   });
 
@@ -25,12 +32,19 @@ export default function CompliancePage() {
     const headerMap: Record<string, Record<string, string>> = {
       sipnap: {
         id: "ID",
-        name: "Nama Obat",
-        category: "Kategori",
+        date: "Tanggal",
+        productName: "Nama Obat",
         kfaCode: "Kode KFA",
-        currentStock: "Stok Saat Ini",
-        totalSales: "Total Penjualan",
-        unit: "Satuan"
+        category: "Kategori",
+        type: "Jenis",
+        quantity: "Jumlah",
+        unit: "Satuan",
+        pbfName: "Nama PBF",
+        invoiceNumber: "No. Faktur",
+        patientName: "Nama Pasien",
+        patientAddress: "Alamat Pasien",
+        doctorName: "Nama Dokter",
+        doctorSip: "SIP Dokter"
       },
       simona: {
         id: "ID",
@@ -127,8 +141,17 @@ export default function CompliancePage() {
         alert(result.message);
         setLastReports(prev => ({
           ...prev,
-          [id]: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+          [id]: new Date().toLocaleDateString('id-ID', { 
+            day: '2-digit', 
+            month: 'long', 
+            year: 'numeric',
+            timeZone: 'Asia/Jayapura'
+          })
         }));
+
+        // Open official portal for manual upload/finalization
+        if (id === "sipnap") window.open("https://sipnap.kemkes.go.id", "_blank");
+        if (id === "simona") window.open("https://simona.kemkes.go.id/simona_Login/", "_blank");
       } else {
         alert(`Gagal: ${result.error}`);
       }

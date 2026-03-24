@@ -1,49 +1,59 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-
 model Product {
-  id              String          @id @default(cuid())
-  kfaCode         String?         @unique
-  name            String
-  brandName       String?
-  genericName     String?
-  category        String          // Store category values here (NARKOTIKA, PSIKOTROPIKA, etc.)
-  form            String?         // Tablet, Syrup, etc.
-  strength        String?         // 500mg, etc.
-  unit            String?         // Box, Strip, Pcs
-  stock           Int             @default(0)
-  minStock        Int             @default(10)
-  price           Float
-  expiryDate      DateTime?
+  id                 String              @id @default(cuid())
+  kfaCode            String?             @unique
+  name               String
+  brandName          String?
+  genericName        String?
+  category           String
+  form               String?
+  strength           String?
+  unit               String?
+  stock              Int                 @default(0)
+  minStock           Int                 @default(10)
+  price              Float
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  batches            ProductBatch[]
+  purchaseOrderItems PurchaseOrderItem[]
+  movements          StockMovement[]
+  transactionItems   TransactionItem[]
+}
+
+model ProductBatch {
+  id              String   @id @default(cuid())
+  productId       String
   batchNumber     String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  movements       StockMovement[]
-  transactionItems TransactionItem[]
+  expiryDate      DateTime
+  initialQuantity Int
+  currentQuantity Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([expiryDate])
 }
 
 model Patient {
-  id        String   @id @default(cuid())
-  nik       String   @unique
-  name      String
-  phone     String?
-  address   String?
-  birthDate DateTime?
-  gender    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(cuid())
+  nik          String        @unique
+  name         String
+  phone        String?
+  address      String?
+  birthDate    DateTime?
+  gender       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   transactions Transaction[]
 }
 
@@ -51,43 +61,110 @@ model Transaction {
   id            String            @id @default(cuid())
   invoiceNumber String            @unique
   patientId     String?
-  patient       Patient?          @relation(fields: [patientId], references: [id])
   doctorName    String?
   doctorSip     String?
   totalAmount   Float
-  paymentMethod String            // QRIS, CASH, TRANSFER
-  status        String            // PENDING, COMPLETED, CANCELLED
+  paymentMethod String
+  status        String
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
+  patient       Patient?          @relation(fields: [patientId], references: [id])
   items         TransactionItem[]
 }
 
 model TransactionItem {
   id            String      @id @default(cuid())
   transactionId String
-  transaction   Transaction @relation(fields: [transactionId], references: [id])
   productId     String
-  product       Product     @relation(fields: [productId], references: [id])
   quantity      Int
   price         Float
   subtotal      Float
+  product       Product     @relation(fields: [productId], references: [id])
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
 }
 
 model StockMovement {
-  id          String   @id @default(cuid())
-  productId   String
-  product     Product  @relation(fields: [productId], references: [id])
-  type        String   // IN, OUT, ADJUSTMENT
-  quantity    Int
-  reason      String?  // PURCHASE, SALE, EXPIRED, RETURN
-  referenceId String?  // TransactionId or PurchaseOrderId
-  createdAt   DateTime @default(now())
+  id             String   @id @default(cuid())
+  productId      String
+  type           String
+  quantity       Int
+  reason         String?
+  referenceId    String?
+  createdAt      DateTime @default(now())
+  doctorName     String?
+  doctorSip      String?
+  invoiceNumber  String?
+  patientAddress String?
+  patientName    String?
+  pbfName        String?
+  product        Product  @relation(fields: [productId], references: [id])
 }
 
 model Configuration {
-  id    String @id @default(cuid())
-  key   String @unique
-  value String
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
   updatedAt DateTime @updatedAt
 }
 
+model Expense {
+  id          String   @id @default(cuid())
+  description String
+  amount      Float
+  category    String
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PBF {
+  id             String          @id @default(cuid())
+  name           String
+  address        String?
+  phone          String?
+  pic            String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  purchaseOrders PurchaseOrder[]
+}
+
+model PurchaseOrder {
+  id          String              @id @default(cuid())
+  poNumber    String              @unique
+  pbfId       String
+  status      String              @default("PENDING")
+  orderDate   DateTime            @default(now())
+  receiveDate DateTime?
+  totalAmount Float               @default(0)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  pbf         PBF                 @relation(fields: [pbfId], references: [id])
+  items       PurchaseOrderItem[]
+}
+
+model PurchaseOrderItem {
+  id              String        @id @default(cuid())
+  purchaseOrderId String
+  productId       String
+  quantity        Int
+  price           Float
+  subtotal        Float
+  product         Product       @relation(fields: [productId], references: [id])
+  purchaseOrder   PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+}
+
+model Employee {
+  id        String   @id @default(cuid())
+  nik       String   @unique
+  name      String
+  role      String   @default("Karyawan")
+  phone     String?
+  address   String?
+  salary    Float?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  serkom    String?
+  sipa      String?
+  strap     String?
+}

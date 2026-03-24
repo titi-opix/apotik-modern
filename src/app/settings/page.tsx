@@ -14,6 +14,16 @@ export default function SettingsPage() {
     satusehat_organization_id: "",
     pharmacy_name: "Apotek Modern",
     pharmacy_address: "",
+    pharmacy_phone: "",
+    pharmacy_city: "",
+    pharmacy_nib: "",
+    pharmacy_sia: "",
+    apoteker_name: "",
+    apoteker_sipa: "",
+    apoteker_serkom: "",
+    apoteker_strap: "",
+    pharmacy_sipttk: "",
+    pharmacy_npwp: "",
   });
 
   useEffect(() => {
@@ -180,6 +190,143 @@ export default function SettingsPage() {
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                 />
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">Nomor Telepon</label>
+                  <input 
+                    type="text" 
+                    name="pharmacy_phone"
+                    value={settings.pharmacy_phone}
+                    onChange={handleChange}
+                    placeholder="0812..." 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">Kota/Kabupaten</label>
+                  <input 
+                    type="text" 
+                    name="pharmacy_city"
+                    value={settings.pharmacy_city}
+                    onChange={handleChange}
+                    placeholder="Contoh: Jakarta Selatan" 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-50">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-blue-700 flex items-center gap-2">
+                    <ShieldCheck size={14} /> NIB (Nomor Induk Berusaha)
+                  </label>
+                  <input 
+                    type="text" 
+                    name="pharmacy_nib"
+                    value={settings.pharmacy_nib}
+                    onChange={handleChange}
+                    placeholder="Masukkan NIB" 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-blue-50/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition font-mono text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-blue-700 flex items-center gap-2">
+                    <ShieldCheck size={14} /> SIA (Surat Izin Apotek)
+                  </label>
+                  <input 
+                    type="text" 
+                    name="pharmacy_sia"
+                    value={settings.pharmacy_sia}
+                    onChange={handleChange}
+                    placeholder="Masukkan No. SIA" 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-blue-50/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition font-mono text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-blue-700 flex items-center gap-2">
+                    <ShieldCheck size={14} /> SIPA (No. Izin Praktik Apoteker)
+                  </label>
+                  <input 
+                    type="text" 
+                    name="apoteker_sipa"
+                    value={settings.apoteker_sipa}
+                    onChange={handleChange}
+                    placeholder="Masukkan No. SIPA" 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-blue-50/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition font-mono text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-blue-700 flex items-center gap-2">
+                    <ShieldCheck size={14} /> No. Sertifikat Kompetensi (SERKOM)
+                  </label>
+                  <input 
+                    type="text" 
+                    name="apoteker_serkom"
+                    value={settings.apoteker_serkom}
+                    onChange={handleChange}
+                    placeholder="Masukkan No. SERKOM" 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-blue-50/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition font-mono text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-blue-700 flex items-center gap-2">
+                    <ShieldCheck size={14} /> STRAP (Surat Tanda Registrasi)
+                  </label>
+                  <input 
+                    type="text" 
+                    name="apoteker_strap"
+                    value={settings.apoteker_strap}
+                    onChange={handleChange}
+                    placeholder="Masukkan No. STRAP" 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-blue-50/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition font-mono text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-blue-700 flex items-center gap-2">
+                    <ShieldCheck size={14} /> SIPTTK (Tenaga Teknis Keff.)
+                  </label>
+                  <input 
+                    type="text" 
+                    name="pharmacy_sipttk"
+                    value={settings.pharmacy_sipttk}
+                    onChange={handleChange}
+                    placeholder="Masukkan No. SIPTTK" 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-blue-50/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition font-mono text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-50 pt-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">NPWP (Perusahaan/Pribadi)</label>
+                  <input 
+                    type="text" 
+                    name="pharmacy_npwp"
+                    value={settings.pharmacy_npwp}
+                    onChange={handleChange}
+                    placeholder="Masukkan Nomor NPWP" 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition font-mono text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">Nama Apoteker Penanggung Jawab</label>
+                  <input 
+                    type="text" 
+                    name="apoteker_name"
+                    value={settings.apoteker_name}
+                    onChange={handleChange}
+                    placeholder="Nama Lengkap Apoteker" 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700">Alamat Lengkap</label>
                 <textarea 

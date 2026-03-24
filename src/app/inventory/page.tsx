@@ -12,8 +12,13 @@ interface Product {
   category: string;
   stock: number;
   price: number;
+  unit: string | null;
   expiryDate: string | null;
 }
+
+const COMMON_UNITS = [
+  "Tablet", "Kapsul", "Kaplet", "Pcs", "Strip", "Box", "Botol", "Tube", "Ampul", "Vial", "Supp", "Sachet", "Galon"
+];
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -21,6 +26,8 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [mounted, setMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   // Form State
@@ -32,7 +39,18 @@ export default function InventoryPage() {
     category: "REGULER",
     price: "",
     stock: "",
+    unit: "Box",
     expiryDate: "",
+    batchNumber: "",
+  });
+
+  const [updateData, setUpdateData] = useState({
+    quantity: "",
+    expiryDate: "",
+    batchNumber: "",
+    reason: "PURCHASE",
+    pbfName: "",
+    invoiceNumber: "",
   });
 
   useEffect(() => {
@@ -80,7 +98,9 @@ export default function InventoryPage() {
           category: "REGULER",
           price: "",
           stock: "",
+          unit: "Box",
           expiryDate: "",
+          batchNumber: "",
         });
         fetchProducts();
       } else {
@@ -89,6 +109,39 @@ export default function InventoryPage() {
       }
     } catch (error) {
       alert("Terjadi kesalahan saat menyimpan produk.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleUpdateStock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedProduct) return;
+    setIsSaving(true);
+    try {
+      const res = await fetch(`/api/products/${selectedProduct.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateData),
+      });
+
+      if (res.ok) {
+        setIsUpdateModalOpen(false);
+        setUpdateData({
+          quantity: "",
+          expiryDate: "",
+          batchNumber: "",
+          reason: "PURCHASE",
+          pbfName: "",
+          invoiceNumber: "",
+        });
+        fetchProducts();
+      } else {
+        const errorData = await res.json();
+        alert(`Gagal: ${errorData.error}`);
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan.");
     } finally {
       setIsSaving(false);
     }
@@ -109,67 +162,62 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <header className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <Link 
-              href="/" 
-              className="p-2 rounded-lg bg-white border border-gray-200 text-gray-500 hover:text-blue-600 transition"
-            >
-              <ArrowLeft size={20} />
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Kelola Inventaris</h1>
-              <p className="text-sm text-gray-500">Manajemen Stok & Integrasi KFA</p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">
-              <Download size={18} />
-              Export SIMONA
-            </button>
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm shadow-blue-200"
-            >
-              <Plus size={18} />
-              Tambah Produk Manual
-            </button>
-          </div>
-        </header>
+    <>
+      <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Kelola Inventaris</h1>
+          <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Manajemen Stok & Integrasi KFA</p>
+        </div>
+        <div className="flex gap-3">
+          <button className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-100 rounded-2xl text-xs font-black text-gray-600 hover:bg-gray-50 transition shadow-sm active:scale-95">
+            <Download size={16} />
+            Export SIMONA
+          </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-xs font-black hover:bg-blue-700 transition shadow-lg shadow-blue-100 active:scale-95"
+          >
+            <Plus size={16} />
+            Tambah Produk Manual
+          </button>
+        </div>
+      </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: KFA Integration */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <Package className="text-blue-600" size={20} />
+            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-lg font-black text-gray-900 tracking-tight flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                    <Package size={20} />
+                  </div>
                   Cari KFA Browser
                 </h2>
-                <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-bold">
+                <span className="text-[10px] bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full font-black tracking-widest uppercase">
                   LIVE API
                 </span>
               </div>
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-xs text-gray-400 font-bold mb-8 leading-relaxed">
                 Gunakan fitur ini untuk mencari data obat yang sudah terstandar oleh Kemenkes SatuSehat.
               </p>
               <KfaSearch />
             </div>
 
-            <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
-              <h3 className="font-bold text-blue-800 mb-2">💡 Tips Kepatuhan</h3>
-              <p className="text-sm text-blue-700 leading-relaxed">
+            <div className="bg-blue-600 p-8 rounded-[2.5rem] text-white shadow-xl shadow-blue-100 relative overflow-hidden group">
+              <h3 className="font-black text-sm tracking-tight mb-2 relative z-10">💡 Tips Kepatuhan</h3>
+              <p className="text-xs text-blue-100 font-medium leading-relaxed relative z-10">
                 Pastikan setiap obat golongan Narkotika dan Psikotropika memiliki kode KFA yang valid agar laporan SIPNAP dapat dihasilkan secara otomatis.
               </p>
+              <Package className="absolute -bottom-4 -right-4 text-white/10 group-hover:scale-125 transition-transform" size={100} />
             </div>
           </div>
 
           {/* Right Column: Inventory Table */}
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-6 border-b border-gray-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white">
-              <h2 className="font-bold text-gray-900">Stok Apotek Anda</h2>
+          <div className="lg:col-span-2 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+            <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <h2 className="text-xl font-black text-gray-900 tracking-tight">Stok Apotek Anda</h2>
               <div className="flex w-full md:w-auto gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-2.5 text-gray-400" size={16} />
@@ -207,6 +255,7 @@ export default function InventoryPage() {
                       <th className="px-6 py-4">Harga</th>
                       <th className="px-6 py-4">Tgl Kedaluwarsa (ED)</th>
                       <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4">Aksi</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
@@ -227,7 +276,7 @@ export default function InventoryPage() {
                         </td>
                         <td className="px-6 py-4">
                           <span className="text-sm font-medium text-gray-900">{item.stock}</span>
-                          <span className="text-xs text-gray-400 ml-1">Box</span>
+                          <span className="text-xs text-gray-400 ml-1">{item.unit || "Box"}</span>
                         </td>
                         <td className="px-6 py-4 text-sm font-bold text-gray-900">
                           Rp {item.price.toLocaleString()}
@@ -250,6 +299,18 @@ export default function InventoryPage() {
                             }`} />
                             {item.stock > 10 ? 'Aman' : 'Kritis'}
                           </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedProduct(item);
+                              setIsUpdateModalOpen(true);
+                            }}
+                            className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition"
+                          >
+                            Update Stok
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -297,6 +358,17 @@ export default function InventoryPage() {
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold text-gray-700">Nomor Batch (Opsional)</label>
+                <input 
+                  type="text" 
+                  value={formData.batchNumber}
+                  onChange={(e) => setFormData({...formData, batchNumber: e.target.value})}
+                  placeholder="Contoh: BATCH-001"
+                  className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -350,9 +422,23 @@ export default function InventoryPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-bold text-gray-700">Tgl Kedaluwarsa (ED)</label>
+                  <label className="text-sm font-bold text-gray-700">Satuan *</label>
+                  <select 
+                    required
+                    value={formData.unit}
+                    onChange={(e) => setFormData({...formData, unit: e.target.value})}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none font-medium"
+                  >
+                    {COMMON_UNITS.map(unit => (
+                      <option key={unit} value={unit}>{unit}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-bold text-gray-700">Tgl Kedaluwarsa (ED) *</label>
                   <input 
                     type="date" 
+                    required
                     value={formData.expiryDate}
                     onChange={(e) => setFormData({...formData, expiryDate: e.target.value})}
                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
@@ -380,6 +466,114 @@ export default function InventoryPage() {
           </div>
         </div>
       )}
-    </div>
+      {/* Modal Update Stok */}
+      {isUpdateModalOpen && selectedProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-blue-50/50">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Update Stok</h2>
+                <p className="text-xs text-blue-600 font-bold">{selectedProduct.name}</p>
+              </div>
+              <button 
+                onClick={() => setIsUpdateModalOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleUpdateStock} className="p-6 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold text-gray-700">Jumlah Stok Tambahan *</label>
+                <input 
+                  type="number" 
+                  required
+                  min="1"
+                  value={updateData.quantity}
+                  onChange={(e) => setUpdateData({...updateData, quantity: e.target.value})}
+                  placeholder="Masukkan jumlah..."
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-lg"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold text-gray-700">Nomor Batch Baru</label>
+                <input 
+                  type="text"
+                  value={updateData.batchNumber}
+                  onChange={(e) => setUpdateData({...updateData, batchNumber: e.target.value})}
+                  placeholder="Contoh: BATCH-AUG-24"
+                  className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold text-gray-700">Tanggal Kedaluwarsa *</label>
+                <input 
+                  type="date" 
+                  required
+                  value={updateData.expiryDate}
+                  onChange={(e) => setUpdateData({...updateData, expiryDate: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-bold text-gray-700">Nama PBF (Opsional)</label>
+                  <input 
+                    type="text" 
+                    value={updateData.pbfName}
+                    onChange={(e) => setUpdateData({...updateData, pbfName: e.target.value})}
+                    placeholder="Contoh: Kimia Farma"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-bold text-gray-700">No. Faktur (Opsional)</label>
+                  <input 
+                    type="text" 
+                    value={updateData.invoiceNumber}
+                    onChange={(e) => setUpdateData({...updateData, invoiceNumber: e.target.value})}
+                    placeholder="INV-XXX"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold text-gray-700">Alasan Penambahan</label>
+                <select 
+                  value={updateData.reason}
+                  onChange={(e) => setUpdateData({...updateData, reason: e.target.value})}
+                  className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
+                >
+                  <option value="PURCHASE">Pembelian dari PBF</option>
+                  <option value="RETURN">Retur Pelanggan</option>
+                  <option value="ADJUSTMENT">Koreksi Stok (Opname)</option>
+                </select>
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setIsUpdateModalOpen(false)}
+                  className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isSaving}
+                  className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-lg shadow-blue-100"
+                >
+                  {isSaving ? <Loader2 className="animate-spin" size={20} /> : "Simpan Stok"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

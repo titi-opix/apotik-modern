@@ -25,7 +25,7 @@ export async function POST(request: Request) {
         });
       }
 
-      // 2. Create the transaction
+      // 2. Calculate totals and create transaction
       const totalAmount = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
       const invoiceNumber = `INV-${Date.now()}`;
 
@@ -49,17 +49,48 @@ export async function POST(request: Request) {
         },
       });
 
-      // 3. Update stock and record movement
+      // 3. Update stock using FEFO (First Expired, First Out)
       for (const item of items) {
-        await tx.product.update({
-          where: { id: item.id },
-          data: {
-            stock: {
-              decrement: item.quantity,
-            },
+        let remainingToDeduct = item.quantity;
+
+        // Get active batches for this product ordered by expiry date
+        const batches = await tx.productBatch.findMany({
+          where: {
+            productId: item.id,
+            currentQuantity: { gt: 0 },
+            expiryDate: { gt: new Date() }, // Hanya ambil yang belum kedaluwarsa
           },
+          orderBy: { expiryDate: "asc" },
         });
 
+        if (batches.length === 0) {
+          throw new Error(`Stok untuk produk ${item.name} habis, sudah kedaluwarsa, atau tidak memiliki data batch.`);
+        }
+
+        for (const batch of batches) {
+          if (remainingToDeduct <= 0) break;
+
+          const deduction = Math.min(batch.currentQuantity, remainingToDeduct);
+          
+          await tx.productBatch.update({
+            where: { id: batch.id },
+            data: { currentQuantity: batch.currentQuantity - deduction },
+          });
+
+          remainingToDeduct -= deduction;
+        }
+
+        if (remainingToDeduct > 0) {
+          throw new Error(`Stok batch untuk ${item.name} tidak mencukupi (Sisa kurang: ${remainingToDeduct})`);
+        }
+
+        // Update overall product stock
+        await tx.product.update({
+          where: { id: item.id },
+          data: { stock: { decrement: item.quantity } },
+        });
+
+        // Record stock movement (Regulatory Snapshot)
         await tx.stockMovement.create({
           data: {
             productId: item.id,
@@ -67,11 +98,24 @@ export async function POST(request: Request) {
             quantity: item.quantity,
             reason: "SALE",
             referenceId: transaction.id,
+            patientName: patient?.name,
+            patientAddress: patient?.address,
+            doctorName: transaction.doctorName,
+            doctorSip: transaction.doctorSip,
           },
         });
       }
 
-      return transaction;
+      // 4. Fetch the full transaction with patient data for the receipt
+      const fullTransaction = await tx.transaction.findUnique({
+        where: { id: transaction.id },
+        include: { patient: true }
+      });
+
+      return {
+        ...fullTransaction,
+        patientName: fullTransaction?.patient?.name // Flatten for easier access
+      };
     });
 
     // Mock SatuSehat RME Integration

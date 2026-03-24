@@ -7,40 +7,58 @@ export const fetchCache = "force-no-store";
 
 export async function GET() {
   try {
-    // Force dynamic behavior in Next.js 15
-    await headers();
+    // Get dates for current month
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     
-    // Fetch products in NARKOTIKA or PSIKOTROPIKA categories
-    const products = await prisma.product.findMany({
+    // Fetch detailed movements for NARKOTIKA or PSIKOTROPIKA categories
+    const movements = await prisma.stockMovement.findMany({
       where: {
-        category: {
-          in: ["NARKOTIKA", "PSIKOTROPIKA"],
+        /*
+        createdAt: {
+          gte: startOfMonth,
+        },
+        */
+        product: {
+          category: {
+            in: ["NARKOTIKA", "PSIKOTROPIKA"],
+          },
         },
       },
       include: {
-        transactionItems: {
-          include: {
-            transaction: true,
-          },
-        },
-        movements: true,
+        product: true,
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
-
-    // Format data for reporting
-    const reportData = products.map((p) => {
-      const sales = p.transactionItems.reduce((sum, item) => sum + item.quantity, 0);
+ 
+    // Format data for detailed reporting
+    const reportData = movements.map((m) => {
+      const isOut = m.type === "OUT" || (m.type === "ADJUSTMENT" && m.quantity < 0);
+      
       return {
-        id: p.id,
-        name: p.name,
-        category: p.category,
-        kfaCode: p.kfaCode,
-        currentStock: p.stock,
-        totalSales: sales,
-        unit: p.unit,
+        id: m.id,
+        date: m.createdAt.toISOString().split('T')[0],
+        productName: m.product.name,
+        kfaCode: m.product.kfaCode,
+        category: m.product.category,
+        type: m.type,
+        quantity: Math.abs(m.quantity),
+        unit: m.product.unit,
+        
+        // Pemasukan (Incoming) Details
+        pbfName: m.pbfName || (m.type === "IN" ? "PBF Swasta" : "-"),
+        invoiceNumber: m.invoiceNumber || "-",
+        
+        // Pengeluaran (Outgoing) Details
+        patientName: m.patientName || (isOut ? "Umum" : "-"),
+        patientAddress: m.patientAddress || "-",
+        doctorName: m.doctorName || "-",
+        doctorSip: m.doctorSip || "-",
       };
     });
-
+ 
     return NextResponse.json(reportData);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -49,6 +49,7 @@ export default function KfaSearch() {
           ...product,
           stock: 0,
           price: 0,
+          unit: "Box",
         }),
       });
       if (res.ok) {
