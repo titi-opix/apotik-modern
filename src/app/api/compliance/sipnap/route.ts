@@ -7,9 +7,21 @@ export const fetchCache = "force-no-store";
 
 export async function GET() {
   try {
-    // Get dates for current month
+    // Get dates for current month in Jayapura (WIT)
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Jayapura',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric'
+    });
+    
+    const parts = formatter.formatToParts(now);
+    const y = parseInt(parts.find(p => p.type === 'year')?.value || '0');
+    const m = parseInt(parts.find(p => p.type === 'month')?.value || '0');
+    
+    // Start of month in Jayapura
+    const startOfMonth = new Date(`${y}-${m.toString().padStart(2, '0')}-01T00:00:00+09:00`);
     
     // Fetch detailed movements for NARKOTIKA or PSIKOTROPIKA categories
     const movements = await prisma.stockMovement.findMany({
