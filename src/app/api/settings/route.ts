@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { prisma } from "../../../lib/prisma";
+
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 export async function GET() {
   try {
+    // Force dynamic behavior in Next.js 15
+    await headers();
+    
     const config = await (prisma as any).configuration.findMany();
     // Convert array to object for easier frontend use
     const settings = config.reduce((acc: Record<string, string>, item: any) => {

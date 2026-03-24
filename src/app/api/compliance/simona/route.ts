@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { prisma } from "../../../../lib/prisma";
+
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
 
 export async function GET() {
   try {
+    // Force dynamic behavior in Next.js 15
+    await headers();
+    
     const products = await prisma.product.findMany({
       orderBy: { name: "asc" },
     });
