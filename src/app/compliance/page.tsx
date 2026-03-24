@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import * as XLSX from "xlsx";
 import { ArrowLeft, FileCheck, ShieldCheck, Database, Send, CheckCircle2, Loader2, Download } from "lucide-react";
 
 export default function CompliancePage() {
@@ -79,20 +80,93 @@ export default function CompliancePage() {
     return str;
   };
 
-  const handleDownloadCsv = async (id: string, name: string) => {
+  const handleDownloadReport = async (id: string, name: string) => {
     try {
       setLoadingId(`${id}-download`);
       const res = await fetch(`/api/compliance/${id}`);
-      if (!res.ok) throw new Error("Gagal mengambil data untuk CSV");
+      if (!res.ok) throw new Error("Gagal mengambil data untuk laporan");
       
       const data = await res.json();
+      
+      if (id === "sipnap") {
+        if (!data.details || data.details.length === 0) {
+          alert("Tidak ada data SIPNAP untuk diunduh.");
+          return;
+        }
+
+        const wb = XLSX.utils.book_new();
+        
+        // Sheet 1: Ringkasan Stok (Image 2)
+        const summaryHeaders = {
+          id: "ID",
+          productName: "Nama Obat",
+          category: "Kategori",
+          kfaCode: "Kode KFA",
+          currentStock: "Stok Saat",
+          totalSales: "Total Penjualan",
+          unit: "Satuan"
+        };
+        
+        const summaryDataArray = data.summary.map((s: any) => ({
+          [summaryHeaders.id]: s.id,
+          [summaryHeaders.productName]: s.productName,
+          [summaryHeaders.category]: s.category,
+          [summaryHeaders.kfaCode]: s.kfaCode,
+          [summaryHeaders.currentStock]: s.currentStock,
+          [summaryHeaders.totalSales]: s.totalSales,
+          [summaryHeaders.unit]: s.unit
+        }));
+        
+        const wsSummary = XLSX.utils.json_to_sheet(summaryDataArray);
+        XLSX.utils.book_append_sheet(wb, wsSummary, "Ringkasan Stok");
+
+        // Sheet 2: Detail Mutasi (Image 1)
+        const detailsHeaders = {
+          date: "Tanggal",
+          productName: "Nama Obat",
+          kfaCode: "Kode KFA",
+          category: "Kategori",
+          type: "Jenis",
+          quantity: "Jumlah",
+          unit: "Satuan",
+          pbfName: "Nama PBF",
+          invoiceNumber: "No. Faktur",
+          patientName: "Nama Pasien",
+          patientAddress: "Alamat Pasien",
+          doctorName: "Nama Dokter",
+          doctorSip: "SIP Dokter"
+        };
+
+        const detailsDataArray = data.details.map((d: any) => ({
+          [detailsHeaders.date]: d.date,
+          [detailsHeaders.productName]: d.productName,
+          [detailsHeaders.kfaCode]: d.kfaCode,
+          [detailsHeaders.category]: d.category,
+          [detailsHeaders.type]: d.type,
+          [detailsHeaders.quantity]: d.quantity,
+          [detailsHeaders.unit]: d.unit,
+          [detailsHeaders.pbfName]: d.pbfName,
+          [detailsHeaders.invoiceNumber]: d.invoiceNumber,
+          [detailsHeaders.patientName]: d.patientName,
+          [detailsHeaders.patientAddress]: d.patientAddress,
+          [detailsHeaders.doctorName]: d.doctorName,
+          [detailsHeaders.doctorSip]: d.doctorSip
+        }));
+
+        const wsDetails = XLSX.utils.json_to_sheet(detailsDataArray);
+        XLSX.utils.book_append_sheet(wb, wsDetails, "Detail Mutasi");
+
+        XLSX.writeFile(wb, `SIPNAP_Merged_${new Date().toISOString().split('T')[0]}.xlsx`);
+        return;
+      }
+
+      // Fallback to CSV for other reports
       if (data.length === 0) {
         alert("Tidak ada data untuk diunduh.");
         return;
       }
 
       const csv = convertToCSV(data, id);
-      // Add UTF-8 BOM for Excel
       const BOM = '\uFEFF';
       const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -132,7 +206,9 @@ export default function CompliancePage() {
       const res = await fetch(`/api/compliance/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items }),
+        body: JSON.stringify({ 
+          items: id === "sipnap" ? items.details : items 
+        }),
       });
 
       const result = await res.json();
@@ -255,7 +331,7 @@ export default function CompliancePage() {
                   </button>
                   {item.id !== "satusehat" && (
                     <button 
-                      onClick={() => handleDownloadCsv(item.id, item.name)}
+                      onClick={() => handleDownloadReport(item.id, item.name)}
                       disabled={loadingId !== null}
                       className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-100 transition border border-gray-100 disabled:opacity-50"
                     >
@@ -264,7 +340,7 @@ export default function CompliancePage() {
                       ) : (
                         <Download size={16} />
                       )}
-                      Unduh Draft (.csv)
+                      Unduh Draft (Excel)
                     </button>
                   )}
                 </div>

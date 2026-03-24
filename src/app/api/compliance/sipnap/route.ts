@@ -45,8 +45,8 @@ export async function GET() {
       },
     });
  
-    // Format data for detailed reporting
-    const reportData = movements.map((m) => {
+    // Format data for detailed reporting (Image 1)
+    const movementsData = movements.map((m) => {
       const isOut = m.type === "OUT" || (m.type === "ADJUSTMENT" && m.quantity < 0);
       
       return {
@@ -70,8 +70,46 @@ export async function GET() {
         doctorSip: m.doctorSip || "-",
       };
     });
- 
-    return NextResponse.json(reportData);
+
+    // Fetch products summary (Image 2)
+    const products = await prisma.product.findMany({
+      where: {
+        category: {
+          in: ["NARKOTIKA", "PSIKOTROPIKA"],
+        },
+      },
+      include: {
+        movements: {
+          where: {
+            type: "OUT",
+            /*
+            createdAt: {
+              gte: startOfMonth,
+            },
+            */
+          },
+        },
+      },
+    });
+
+    const summaryData = products.map((p) => {
+      const totalSales = p.movements.reduce((sum, m) => sum + Math.abs(m.quantity), 0);
+      
+      return {
+        id: p.id,
+        productName: p.name,
+        category: p.category,
+        kfaCode: p.kfaCode || "-",
+        currentStock: p.stock,
+        totalSales: totalSales,
+        unit: p.unit || "Tablet",
+      };
+    });
+
+    return NextResponse.json({
+      details: movementsData,
+      summary: summaryData
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
