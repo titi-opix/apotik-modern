@@ -164,25 +164,25 @@ export default function InventoryPage() {
   return (
     <>
       <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight">Kelola Inventaris</h1>
-          <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Manajemen Stok & Integrasi KFA</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Kelola Inventaris</h1>
+            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Manajemen Stok & Integrasi KFA</p>
+          </div>
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 bg-white border border-gray-100 rounded-2xl text-[10px] md:text-xs font-black text-gray-600 hover:bg-gray-50 transition shadow-sm active:scale-95">
+              <Download size={16} />
+              Export SIMONA
+            </button>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 bg-blue-600 text-white rounded-2xl text-[10px] md:text-xs font-black hover:bg-blue-700 transition shadow-lg shadow-blue-100 active:scale-95"
+            >
+              <Plus size={16} />
+              Tambah Produk
+            </button>
+          </div>
         </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-100 rounded-2xl text-xs font-black text-gray-600 hover:bg-gray-50 transition shadow-sm active:scale-95">
-            <Download size={16} />
-            Export SIMONA
-          </button>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl text-xs font-black hover:bg-blue-700 transition shadow-lg shadow-blue-100 active:scale-95"
-          >
-            <Plus size={16} />
-            Tambah Produk Manual
-          </button>
-        </div>
-      </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: KFA Integration */}
@@ -235,7 +235,7 @@ export default function InventoryPage() {
               </div>
             </div>
             
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scrollbar-hide">
               {loading ? (
                 <div className="flex justify-center py-20">
                   <Loader2 className="animate-spin text-blue-600" size={40} />

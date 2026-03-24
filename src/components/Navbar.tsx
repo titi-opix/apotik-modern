@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, HelpCircle, Search } from "lucide-react";
+import { Bell, HelpCircle, Search, Menu } from "lucide-react";
 
-export function Navbar() {
+export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const pathname = usePathname();
 
   const navItems = [
@@ -14,9 +14,17 @@ export function Navbar() {
   ];
 
   return (
-    <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-30">
-      <div className="flex items-center gap-8 flex-1">
-        <div className="relative w-full max-w-md group">
+    <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
+      <div className="flex items-center gap-4 md:gap-8 flex-1">
+        {onMenuClick && (
+          <button 
+            onClick={onMenuClick}
+            className="lg:hidden p-2 text-gray-500 hover:bg-gray-50 rounded-xl transition"
+          >
+            <Menu size={24} />
+          </button>
+        )}
+        <div className="relative w-full max-w-md group hidden sm:block">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-500" size={18} />
           <input 
             type="text" 
@@ -25,7 +33,7 @@ export function Navbar() {
           />
         </div>
 
-        <nav className="flex items-center gap-6">
+        <nav className="hidden lg:flex items-center gap-6">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (

@@ -17,6 +17,7 @@ import {
   Printer,
   X
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Product {
   id: string;
@@ -50,6 +51,7 @@ export default function PosPage() {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [lastTransaction, setLastTransaction] = useState<any>(null);
+  const [showCartMobile, setShowCartMobile] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -283,9 +285,12 @@ export default function PosPage() {
 
   return (
     <>
-      <div className="flex h-[calc(100vh-120px)] overflow-hidden gap-8 animate-in fade-in duration-500">
+      <div className="flex flex-col lg:flex-row h-full lg:h-[calc(100vh-120px)] overflow-hidden gap-8 animate-in fade-in duration-500 relative">
         {/* Left Section: Product Selection */}
-        <div className="flex-1 overflow-y-auto pr-4 scrollbar-hide">
+        <div className={cn(
+          "flex-1 overflow-y-auto pr-0 lg:pr-4 scrollbar-hide pb-20 lg:pb-0",
+          showCartMobile ? "hidden lg:block" : "block"
+        )}>
           <div className="space-y-8">
             <div className="relative group">
               <input 
@@ -343,8 +348,11 @@ export default function PosPage() {
         </div>
 
         {/* Right Section: Cart & Checkout */}
-        <div className="w-[450px] bg-white border-l border-gray-200 flex flex-col">
-          <div className="p-6 border-b border-gray-100">
+        <div className={cn(
+          "fixed inset-0 z-20 bg-white lg:relative lg:inset-auto lg:z-0 lg:w-[450px] lg:border-l lg:border-gray-200 flex flex-col transition-transform duration-300",
+          showCartMobile ? "translate-x-0" : "translate-x-full lg:translate-x-0"
+        )}>
+          <div className="p-6 border-b border-gray-100 flex items-center justify-between lg:justify-start">
             <h2 className="text-lg font-bold flex items-center gap-2">
               <ShoppingCart size={20} className="text-blue-600" />
               Keranjang Belanja
@@ -352,6 +360,12 @@ export default function PosPage() {
                 {cart.length} Item
               </span>
             </h2>
+            <button 
+              onClick={() => setShowCartMobile(false)}
+              className="lg:hidden p-2 text-gray-400 hover:bg-gray-50 rounded-xl"
+            >
+              <X size={24} />
+            </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-hide">
@@ -477,6 +491,22 @@ export default function PosPage() {
             </button>
           </div>
         </div>
+
+        {/* Mobile View Cart Toggle */}
+        {!showCartMobile && cart.length > 0 && (
+          <div className="fixed bottom-6 left-6 right-6 lg:hidden z-30">
+            <button 
+              onClick={() => setShowCartMobile(true)}
+              className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-3 shadow-2xl shadow-blue-200 animate-in slide-in-from-bottom-10"
+            >
+              <ShoppingCart size={20} />
+              Lihat Keranjang ({cart.length})
+              <span className="ml-auto bg-white/20 px-3 py-1 rounded-lg">
+                Rp {totalAmount.toLocaleString()}
+              </span>
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

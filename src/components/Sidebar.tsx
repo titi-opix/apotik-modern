@@ -14,7 +14,8 @@ import {
   ShoppingCart,
   Truck,
   Users,
-  ShieldCheck
+  ShieldCheck,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,20 +32,27 @@ const menuItems = [
   { icon: Settings, label: "Pengaturan", href: "/settings" },
 ];
 
-export function Sidebar() {
+export function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
 
   return (
     <div className="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0">
       <div className="p-8">
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
-            <Package size={24} />
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+              <Package size={24} />
+            </div>
+            <div>
+              <h1 className="text-xl font-black text-gray-900 tracking-tight">Apotek Modern</h1>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">The Clinical Editorial</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-black text-gray-900 tracking-tight">Apotek Modern</h1>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">The Clinical Editorial</p>
-          </div>
+          {onClose && (
+            <button onClick={onClose} className="lg:hidden p-2 text-gray-400 hover:bg-gray-50 rounded-lg transition">
+              <X size={20} />
+            </button>
+          )}
         </div>
 
         <nav className="space-y-1">
@@ -54,6 +62,7 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={onClose}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative",
                   isActive
