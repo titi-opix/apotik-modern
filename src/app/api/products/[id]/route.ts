@@ -66,17 +66,27 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    console.log(`[API] Attempting to delete product: ${id}`);
 
     await prisma.$transaction(async (tx) => {
-      // 1. Delete associated data first (Manually since some lack Cascade)
+      // 0. Verify product exists
+      const product = await tx.product.findUnique({ where: { id } });
+      if (!product) {
+        console.warn(`[API] Product ${id} not found for deletion`);
+        throw new Error("Produk sudah tidak ada atau telah dihapus.");
+      }
+
+      console.log(`[API] Product found: ${product.name}. Deleting associated records...`);
+
+      // 1. Delete associated data first
+      await tx.productBatch.deleteMany({ where: { productId: id } });
       await tx.stockMovement.deleteMany({ where: { productId: id } });
       await tx.transactionItem.deleteMany({ where: { productId: id } });
       await tx.purchaseOrderItem.deleteMany({ where: { productId: id } });
-      // ProductBatch has Cascade in schema, but being explicit is safer if needed
-      await tx.productBatch.deleteMany({ where: { productId: id } });
 
       // 2. Delete the product
       await tx.product.delete({ where: { id } });
+      console.log(`[API] Product ${id} deleted successfully`);
     });
 
     return NextResponse.json({ message: "Product deleted successfully" });

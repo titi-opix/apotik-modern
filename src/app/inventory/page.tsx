@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Package, Plus, Filter, Download, Loader2, Search, X, Trash2 } from "lucide-react";
 import KfaSearch from "./KfaSearch";
+import { cn } from "@/lib/utils";
 
 interface Product {
   id: string;
@@ -29,6 +30,7 @@ export default function InventoryPage() {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -150,6 +152,7 @@ export default function InventoryPage() {
   const handleDeleteProduct = async (id: string, name: string) => {
     if (!confirm(`Apakah Anda yakin ingin menghapus produk "${name}"? Semua data stok dan mutasi terkait akan ikut terhapus.`)) return;
     
+    setIsDeleting(id);
     try {
       const res = await fetch(`/api/products/${id}`, {
         method: "DELETE",
@@ -163,6 +166,8 @@ export default function InventoryPage() {
       }
     } catch (error) {
       alert("Terjadi kesalahan saat menghapus produk.");
+    } finally {
+      setIsDeleting(null);
     }
   };
 
@@ -336,10 +341,14 @@ export default function InventoryPage() {
                                 e.stopPropagation();
                                 handleDeleteProduct(item.id, item.name);
                               }}
-                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                              disabled={isDeleting === item.id}
+                              className={cn(
+                                "p-1.5 rounded-lg transition",
+                                isDeleting === item.id ? "text-gray-300 bg-gray-50" : "text-gray-400 hover:text-red-600 hover:bg-red-50"
+                              )}
                               title="Hapus Produk"
                             >
-                              <Trash2 size={16} />
+                              {isDeleting === item.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                             </button>
                           </div>
                         </td>
