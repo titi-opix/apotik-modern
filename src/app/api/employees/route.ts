@@ -22,7 +22,10 @@ import bcrypt from "bcryptjs";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nik, username, password, name, role, phone, address, salary, serkom, strap, sipa } = body;
+    const { 
+      nik, username, password, name, role, phone, address, salary, 
+      serkom, stra, sipa, strttk, sipttk 
+    } = body;
 
     if (!nik || !name || !username || !password) {
       return NextResponse.json({ error: "NIK, Name, Username, and Password are required" }, { status: 400 });
@@ -43,8 +46,13 @@ export async function POST(request: Request) {
         address,
         salary: salary ? parseFloat(salary) : null,
         serkom,
-        strap,
+        // @ts-ignore
+        stra,
         sipa,
+        // @ts-ignore
+        strttk,
+        // @ts-ignore
+        sipttk,
       },
     });
 

@@ -34,7 +34,7 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { nik, username, password, name, role, phone, address, salary, isActive, serkom, strap, sipa } = body;
+    const { nik, username, password, name, role, phone, address, salary, isActive, serkom, stra, sipa, strttk, sipttk } = body;
 
     const data: any = {};
     if (nik !== undefined) data.nik = nik;
@@ -46,8 +46,13 @@ export async function PATCH(
     if (address !== undefined) data.address = address;
     if (isActive !== undefined) data.isActive = isActive;
     if (serkom !== undefined) data.serkom = serkom;
-    if (strap !== undefined) data.strap = strap;
+    // @ts-ignore
+    if (stra !== undefined) data.stra = stra;
     if (sipa !== undefined) data.sipa = sipa;
+    // @ts-ignore
+    if (strttk !== undefined) data.strttk = strttk;
+    // @ts-ignore
+    if (sipttk !== undefined) data.sipttk = sipttk;
     if (salary !== undefined) data.salary = salary ? parseFloat(salary) : null;
 
     if (password) {
