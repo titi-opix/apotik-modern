@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, Loader2, ShieldCheck, Database, Building2, Key, Info } from "lucide-react";
+import { ArrowLeft, Save, Loader2, ShieldCheck, Database, Building2, Key, Info, Trash2, AlertTriangle } from "lucide-react";
 
 export default function SettingsPage() {
   const [mounted, setMounted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [resetting, setResetting] = useState(false);
   const [settings, setSettings] = useState({
     satusehat_client_id: "",
     satusehat_client_secret: "",
@@ -71,6 +72,34 @@ export default function SettingsPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setSettings(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleResetData = async () => {
+    const confirmation = confirm("PERINGATAN KRITIS: Anda akan menghapus SELURUH data transaksi, stok, pasien, dan pengeluaran. Tindakan ini TIDAK DAPAT dibatalkan. Apakah Anda yakin?");
+    
+    if (!confirmation) return;
+
+    const finalConfirm = prompt("Ketik 'RESET' untuk mengonfirmasi penghapusan seluruh data:");
+    if (finalConfirm !== "RESET") return;
+
+    setResetting(true);
+    try {
+      const res = await fetch("/api/settings/reset", {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        alert("Seluruh data berhasil dibersihkan.");
+        window.location.reload();
+      } else {
+        const error = await res.json();
+        alert(`Gagal reset: ${error.error}`);
+      }
+    } catch (error: any) {
+      alert(`Terjadi kesalahan: ${error.message}`);
+    } finally {
+      setResetting(false);
+    }
   };
 
   if (!mounted || loading) {
@@ -341,6 +370,34 @@ export default function SettingsPage() {
             </div>
           </section>
         </form>
+
+        {/* Danger Zone */}
+        <section className="mt-12 bg-red-50 rounded-2xl border border-red-100 overflow-hidden">
+          <div className="p-6 border-b border-red-100 bg-red-100/30 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-red-100 text-red-600">
+              <AlertTriangle size={20} />
+            </div>
+            <h2 className="font-bold text-red-900 tracking-tight">Danger Zone (Manajemen Data)</h2>
+          </div>
+          <div className="p-8 space-y-4">
+            <div>
+              <h3 className="text-sm font-bold text-red-900 mb-1">Reset Seluruh Data</h3>
+              <p className="text-xs text-red-700 leading-relaxed mb-6">
+                Ini akan menghapus seluruh daftar produk, stok, riwayat transaksi, data pasien, dan pengeluaran. 
+                Gunakan ini hanya jika Anda ingin membersihkan data uji coba dan mulai dari nol. 
+                <strong> Pengaturan apotek dan data karyawan tetap dipertahankan.</strong>
+              </p>
+              <button 
+                onClick={handleResetData}
+                disabled={resetting}
+                className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-700 transition shadow-lg shadow-red-200 disabled:opacity-50"
+              >
+                {resetting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
+                Bersihkan Semua Data
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
