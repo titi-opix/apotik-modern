@@ -23,19 +23,7 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token, req }) => {
-        const { pathname } = req.nextUrl;
-        // Pengecualian eksplisit untuk seeding dan debug agar tidak kena redirect
-        if (
-          pathname.startsWith("/api/auth") || 
-          pathname.startsWith("/api/seed") || 
-          pathname.startsWith("/api/debug") ||
-          pathname === "/login"
-        ) {
-          return true;
-        }
-        return !!token;
-      },
+      authorized: ({ token }) => !!token,
     },
     pages: {
       signIn: "/login",
@@ -45,6 +33,14 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/auth (Auth.js routes)
+     * - login (login page)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api/auth|login|_next/static|_next/image|favicon.ico).*)",
   ],
 };

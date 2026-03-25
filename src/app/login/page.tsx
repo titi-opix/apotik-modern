@@ -127,12 +127,9 @@ export default function LoginPage() {
         </div>
 
         {/* Footer info */}
-        <div className="mt-10 flex flex-col items-center justify-center gap-2 text-gray-400">
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={16} />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Akses Terenkripsi Aman</span>
-          </div>
-          <span className="text-[9px] font-medium opacity-50">v1.0.5 - Deployment Fix</span>
+        <div className="mt-10 flex items-center justify-center gap-2 text-gray-400">
+          <ShieldCheck size={16} />
+          <span className="text-[10px] font-bold uppercase tracking-widest">Akses Terenkripsi Aman</span>
         </div>
       </div>
     </div>
