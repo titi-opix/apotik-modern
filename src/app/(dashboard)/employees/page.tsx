@@ -177,7 +177,10 @@ export default function EmployeesPage() {
             apoteker_name: emp.name,
             apoteker_sipa: emp.sipa || "",
             apoteker_serkom: emp.serkom || "",
-            apoteker_strap: emp.stra || "", // Map STRA to the PO strap field
+            apoteker_strap: emp.stra || "", // Map STRA to THE STRAP key used in settings/PO
+            pharmacy_sipttk: emp.sipttk || "",
+            // Also store assistant technician if role is Asisten Apoteker
+            ...(emp.role === "ASISTEN APOTEKER" ? { assistant_name: emp.name } : {})
           }
         }),
       });
@@ -284,7 +287,10 @@ export default function EmployeesPage() {
 
                 {(emp.role === "APOTEKER" || emp.role === "ASISTEN APOTEKER") && (emp.serkom || emp.sipa || emp.stra || emp.sipttk || emp.strttk) && (
                   <div className="mt-4 p-4 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-2">
-                    <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">Sertifikasi & Izin</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <ShieldCheck size={16} className="text-purple-600" />
+                      <p className="text-[10px] font-black text-gray-900 uppercase tracking-widest">Kepatuhan (Compliance)</p>
+                    </div>
                     {emp.serkom && (
                       <div className="flex items-center gap-2 text-[10px] text-gray-600 font-bold">
                         <ShieldCheck size={12} className="text-purple-400" />

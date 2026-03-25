@@ -42,8 +42,12 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
 
   const filteredMenuItems = menuItems.filter(item => {
     // Admin only pages
-    if (["/settings", "/employees", "/compliance"].includes(item.href)) {
+    if (["/settings", "/employees"].includes(item.href)) {
       return userRole === "ADMIN";
+    }
+    // Compliance: Admin and Apoteker
+    if (item.href === "/compliance") {
+      return userRole === "ADMIN" || userRole === "APOTEKER";
     }
     // Staff restricted pages (Cashier cannot manage stock)
     if (item.href === "/inventory" && userRole === "STAFF") {

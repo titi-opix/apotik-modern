@@ -7,10 +7,15 @@ export default withAuth(
     const path = req.nextUrl.pathname;
 
     // Admin only routes
-    const adminRoutes = ["/settings", "/employees", "/compliance"];
-    const isAdminRoute = adminRoutes.some(route => path.startsWith(route));
+    const adminOnlyRoutes = ["/settings", "/employees"];
+    const isAdminOnlyRoute = adminOnlyRoutes.some(route => path.startsWith(route));
 
-    if (isAdminRoute && token?.role !== "ADMIN") {
+    if (isAdminOnlyRoute && token?.role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+
+    // Compliance route: Admin and Apoteker
+    if (path.startsWith("/compliance") && token?.role !== "ADMIN" && token?.role !== "APOTEKER") {
       return NextResponse.redirect(new URL("/", req.url));
     }
 

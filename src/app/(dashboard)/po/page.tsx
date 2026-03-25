@@ -388,8 +388,8 @@ export default function POPage() {
           <div className="flex justify-end mt-24">
             <div className="text-center w-72">
               <p className="font-bold mb-24 opacity-80">{settings.pharmacy_city || "Kota"}, {new Date().toLocaleDateString()}</p>
-              <p className="font-black underline uppercase text-lg">{settings.apoteker_name || "Apoteker Penanggung Jawab"}</p>
               <p className="text-xs font-bold uppercase tracking-widest mt-1">SIPA: {settings.apoteker_sipa || "-"}</p>
+              <p className="text-xs font-bold uppercase tracking-widest">STRA: {settings.apoteker_strap || "-"}</p>
             </div>
           </div>
         </div>
