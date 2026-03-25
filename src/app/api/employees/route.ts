@@ -17,20 +17,28 @@ export async function GET() {
   }
 }
 
+import bcrypt from "bcryptjs";
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nik, name, role, phone, address, salary, serkom, strap, sipa } = body;
+    const { nik, username, password, name, role, phone, address, salary, serkom, strap, sipa } = body;
 
-    if (!nik || !name) {
-      return NextResponse.json({ error: "NIK and Name are required" }, { status: 400 });
+    if (!nik || !name || !username || !password) {
+      return NextResponse.json({ error: "NIK, Name, Username, and Password are required" }, { status: 400 });
     }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const employee = await prisma.employee.create({
       data: {
         nik,
+        // @ts-ignore
+        username,
+        // @ts-ignore
+        password: hashedPassword,
         name,
-        role: role || "Karyawan",
+        role: role || "STAFF",
         phone,
         address,
         salary: salary ? parseFloat(salary) : null,

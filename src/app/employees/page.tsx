@@ -18,7 +18,8 @@ import {
   IdCard,
   Trash2,
   Edit,
-  ShieldCheck
+  ShieldCheck,
+  Lock
 } from "lucide-react";
 
 interface Employee {
@@ -26,6 +27,7 @@ interface Employee {
   nik: string;
   name: string;
   role: string;
+  username: string;
   phone: string | null;
   address: string | null;
   salary: number | null;
@@ -46,8 +48,10 @@ export default function EmployeesPage() {
 
   const [formData, setFormData] = useState({
     nik: "",
+    username: "",
+    password: "",
     name: "",
-    role: "Karyawan",
+    role: "STAFF",
     phone: "",
     address: "",
     salary: "",
@@ -79,8 +83,10 @@ export default function EmployeesPage() {
     setEditingEmployee(null);
     setFormData({
       nik: "",
+      username: "",
+      password: "",
       name: "",
-      role: "Karyawan",
+      role: "STAFF",
       phone: "",
       address: "",
       salary: "",
@@ -95,6 +101,8 @@ export default function EmployeesPage() {
     setEditingEmployee(employee);
     setFormData({
       nik: employee.nik,
+      username: employee.username || "",
+      password: "", // Jangan tampilkan password lama
       name: employee.name,
       role: employee.role,
       phone: employee.phone || "",
@@ -349,12 +357,40 @@ export default function EmployeesPage() {
                       onChange={(e) => setFormData({...formData, role: e.target.value})}
                       className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm appearance-none"
                     >
-                      <option value="Karyawan">Karyawan</option>
-                      <option value="Apoteker">Apoteker</option>
-                      <option value="Asisten Apoteker">Asisten Apoteker</option>
-                      <option value="Kasir">Kasir</option>
-                      <option value="Admin">Admin</option>
+                      <option value="ADMIN">ADMIN (Full Access)</option>
+                      <option value="STAFF">STAFF (Kasir)</option>
                     </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Username *</label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                    <input 
+                      type="text" 
+                      required
+                      value={formData.username}
+                      onChange={(e) => setFormData({...formData, username: e.target.value})}
+                      placeholder="username_login"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{editingEmployee ? "Password (Kosongkan jika tidak diubah)" : "Password *"}</label>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+                    <input 
+                      type="password" 
+                      required={!editingEmployee}
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      placeholder="••••••••"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
+                    />
                   </div>
                 </div>
               </div>
