@@ -367,37 +367,30 @@ export default function SettingsPage() {
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-none"
                 />
               </div>
+
+              {/* Danger Zone moved inside form for better visibility */}
+              <div className="mt-12 p-8 bg-red-50 rounded-2xl border border-red-100 space-y-4">
+                <div className="flex items-center gap-3 text-red-900">
+                  <AlertTriangle size={24} />
+                  <h2 className="text-xl font-bold">ZONA BERBAHAYA (Reset Data)</h2>
+                </div>
+                <p className="text-sm text-red-700 leading-relaxed">
+                  Tombol di bawah ini akan menghapus <strong>SELURUH</strong> data produk, stok, transaksi, pasien, dan pengeluaran. 
+                  Ini berguna jika Anda ingin membersihkan data uji coba. Tindakan ini tidak dapat dibatalkan.
+                </p>
+                <button 
+                  type="button"
+                  onClick={handleResetData}
+                  disabled={resetting}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-red-600 text-white rounded-xl text-sm font-black uppercase tracking-widest hover:bg-black transition shadow-lg shadow-red-200 disabled:opacity-50"
+                >
+                  {resetting ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={20} />}
+                  Hapus & Reset Seluruh Data Program
+                </button>
+              </div>
             </div>
           </section>
         </form>
-
-        {/* Danger Zone */}
-        <section className="mt-12 bg-red-50 rounded-2xl border border-red-100 overflow-hidden">
-          <div className="p-6 border-b border-red-100 bg-red-100/30 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-red-100 text-red-600">
-              <AlertTriangle size={20} />
-            </div>
-            <h2 className="font-bold text-red-900 tracking-tight">Danger Zone (Manajemen Data)</h2>
-          </div>
-          <div className="p-8 space-y-4">
-            <div>
-              <h3 className="text-sm font-bold text-red-900 mb-1">Reset Seluruh Data</h3>
-              <p className="text-xs text-red-700 leading-relaxed mb-6">
-                Ini akan menghapus seluruh daftar produk, stok, riwayat transaksi, data pasien, dan pengeluaran. 
-                Gunakan ini hanya jika Anda ingin membersihkan data uji coba dan mulai dari nol. 
-                <strong> Pengaturan apotek dan data karyawan tetap dipertahankan.</strong>
-              </p>
-              <button 
-                onClick={handleResetData}
-                disabled={resetting}
-                className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-700 transition shadow-lg shadow-red-200 disabled:opacity-50"
-              >
-                {resetting ? <Loader2 className="animate-spin" size={16} /> : <Trash2 size={16} />}
-                Bersihkan Semua Data
-              </button>
-            </div>
-          </div>
-        </section>
       </div>
     </div>
   );
