@@ -60,8 +60,8 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error("POST /api/employees error:", error);
     if (error.code === "P2002") {
-      return NextResponse.json({ error: "Employee with this NIK already exists" }, { status: 400 });
+      return NextResponse.json({ error: `Data duplikat: ${error.meta?.target || "NIK atau Username sudah ada"}` }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to create employee" }, { status: 500 });
+    return NextResponse.json({ error: `Gagal create: ${error.message}` }, { status: 500 });
   }
 }
