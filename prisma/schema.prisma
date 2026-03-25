@@ -156,8 +156,11 @@ model PurchaseOrderItem {
 model Employee {
   id        String   @id @default(cuid())
   nik       String   @unique
+  username  String   @unique
   name      String
-  role      String   @default("Karyawan")
+  email     String?  @unique
+  password  String   @default("$2a$12$R.S.Y.Z.D.Y.Z.D.Y.Z.D.Y.Z.D.Y.Z.D.Y.Z.D.Y.Z.D.Y.Z.D") // Hashed 'admin123'
+  role      String   @default("STAFF") // "ADMIN", "STAFF"
   phone     String?
   address   String?
   salary    Float?

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
@@ -15,7 +16,8 @@ import {
   Truck,
   Users,
   ShieldCheck,
-  X
+  X,
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +37,20 @@ const menuItems = [
 
 export function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const userRole = session?.user?.role || "STAFF";
+
+  const filteredMenuItems = menuItems.filter(item => {
+    // Admin only pages
+    if (["/settings", "/employees", "/compliance"].includes(item.href)) {
+      return userRole === "ADMIN";
+    }
+    // Staff restricted pages (Cashier cannot manage stock)
+    if (item.href === "/inventory" && userRole === "STAFF") {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="w-72 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0">
@@ -57,7 +73,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         </div>
 
         <nav className="space-y-1">
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
@@ -88,10 +104,27 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         </nav>
       </div>
 
-      <div className="mt-auto p-8">
-        <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Pharmacy Intelligence</p>
-          <Link href="/reports" className="w-full bg-blue-600 text-white py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition active:scale-95 flex items-center justify-center">
+      <div className="mt-auto p-8 space-y-4">
+        <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 font-bold">
+            {session?.user?.name?.[0] || "U"}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-black text-gray-900 truncate">{session?.user?.name || "User"}</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{userRole}</p>
+          </div>
+          <button 
+            onClick={() => signOut()}
+            className="p-2 text-gray-400 hover:text-red-600 transition"
+            title="Keluar"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
+
+        <div className="bg-blue-600 rounded-2xl p-4 shadow-lg shadow-blue-100">
+          <p className="text-[10px] font-black text-blue-100 uppercase tracking-widest mb-3">Pharmacy Intelligence</p>
+          <Link href="/reports" className="w-full bg-white text-blue-600 py-2 rounded-xl text-xs font-black hover:bg-black hover:text-white transition active:scale-95 flex items-center justify-center">
             Lihat Analitik
           </Link>
         </div>
