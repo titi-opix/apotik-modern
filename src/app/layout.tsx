@@ -18,9 +18,7 @@ export default function RootLayout({
     <html lang="id">
       <body className="antialiased font-sans flex min-h-screen bg-slate-50">
         <Providers>
-          <DashboardLayout>
-            {children}
-          </DashboardLayout>
+          {children}
         </Providers>
       </body>
     </html>
