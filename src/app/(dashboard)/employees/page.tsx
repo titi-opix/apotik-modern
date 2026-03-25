@@ -32,8 +32,10 @@ interface Employee {
   address: string | null;
   salary: number | null;
   serkom: string | null;
-  strap: string | null;
+  stra: string | null;
   sipa: string | null;
+  strttk: string | null;
+  sipttk: string | null;
   isActive: boolean;
 }
 
@@ -56,8 +58,10 @@ export default function EmployeesPage() {
     address: "",
     salary: "",
     serkom: "",
-    strap: "",
+    stra: "",
     sipa: "",
+    strttk: "",
+    sipttk: "",
   });
 
   useEffect(() => {
@@ -91,8 +95,10 @@ export default function EmployeesPage() {
       address: "",
       salary: "",
       serkom: "",
-      strap: "",
+      stra: "",
       sipa: "",
+      strttk: "",
+      sipttk: "",
     });
     setIsModalOpen(true);
   };
@@ -109,8 +115,10 @@ export default function EmployeesPage() {
       address: employee.address || "",
       salary: employee.salary?.toString() || "",
       serkom: employee.serkom || "",
-      strap: employee.strap || "",
+      stra: employee.stra || "",
       sipa: employee.sipa || "",
+      strttk: employee.strttk || "",
+      sipttk: employee.sipttk || "",
     });
     setIsModalOpen(true);
   };
@@ -169,7 +177,7 @@ export default function EmployeesPage() {
             apoteker_name: emp.name,
             apoteker_sipa: emp.sipa || "",
             apoteker_serkom: emp.serkom || "",
-            apoteker_strap: emp.strap || "",
+            apoteker_strap: emp.stra || "", // Map STRA to the PO strap field
           }
         }),
       });
@@ -274,7 +282,7 @@ export default function EmployeesPage() {
                   )}
                 </div>
 
-                {emp.role === "Apoteker" && (emp.serkom || emp.strap || emp.sipa) && (
+                {(emp.role === "APOTEKER" || emp.role === "ASISTEN APOTEKER") && (emp.serkom || emp.sipa || emp.stra || emp.sipttk || emp.strttk) && (
                   <div className="mt-4 p-4 bg-purple-50/50 rounded-2xl border border-purple-100 space-y-2">
                     <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">Sertifikasi & Izin</p>
                     {emp.serkom && (
@@ -283,10 +291,10 @@ export default function EmployeesPage() {
                         <span>Serkom: {emp.serkom}</span>
                       </div>
                     )}
-                    {emp.strap && (
+                    {emp.stra && (
                       <div className="flex items-center gap-2 text-[10px] text-gray-600 font-bold">
                         <ShieldCheck size={12} className="text-purple-400" />
-                        <span>STRAP: {emp.strap}</span>
+                        <span>STRA: {emp.stra}</span>
                       </div>
                     )}
                     {emp.sipa && (
@@ -295,12 +303,26 @@ export default function EmployeesPage() {
                         <span>SIPA: {emp.sipa}</span>
                       </div>
                     )}
-                    <button 
-                      onClick={() => handleApplyToSettings(emp)}
-                      className="mt-2 w-full py-2 bg-purple-600 text-white text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-purple-700 transition shadow-sm active:scale-95"
-                    >
-                      Terapkan ke Data Apotik
-                    </button>
+                    {emp.strttk && (
+                      <div className="flex items-center gap-2 text-[10px] text-gray-600 font-bold">
+                        <ShieldCheck size={12} className="text-purple-400" />
+                        <span>STRTTK: {emp.strttk}</span>
+                      </div>
+                    )}
+                    {emp.sipttk && (
+                      <div className="flex items-center gap-2 text-[10px] text-gray-600 font-bold">
+                        <ShieldCheck size={12} className="text-purple-400" />
+                        <span>SIPTTK: {emp.sipttk}</span>
+                      </div>
+                    )}
+                    {emp.role === "APOTEKER" && (
+                      <button 
+                        onClick={() => handleApplyToSettings(emp)}
+                        className="mt-2 w-full py-2 bg-purple-600 text-white text-[9px] font-black uppercase tracking-widest rounded-xl hover:bg-purple-700 transition shadow-sm active:scale-95"
+                      >
+                        Terapkan ke Data Apotik
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -358,106 +380,20 @@ export default function EmployeesPage() {
                       className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm appearance-none"
                     >
                       <option value="ADMIN">ADMIN (Full Access)</option>
+                      <option value="APOTEKER">APOTEKER (Penanggung Jawab)</option>
+                      <option value="ASISTEN APOTEKER">ASISTEN APOTEKER (Tenaga Teknis)</option>
                       <option value="STAFF">STAFF (Kasir)</option>
                     </select>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Username *</label>
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
-                    <input 
-                      type="text" 
-                      required
-                      value={formData.username}
-                      onChange={(e) => setFormData({...formData, username: e.target.value})}
-                      placeholder="username_login"
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{editingEmployee ? "Password (Kosongkan jika tidak diubah)" : "Password *"}</label>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
-                    <input 
-                      type="password" 
-                      required={!editingEmployee}
-                      value={formData.password}
-                      onChange={(e) => setFormData({...formData, password: e.target.value})}
-                      placeholder="••••••••"
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nama Lengkap *</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
-                  <input 
-                    type="text" 
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="Nama Nama Karyawan"
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Telepon</label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
-                    <input 
-                      type="text" 
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      placeholder="08123xxx"
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Gaji Pokok (Rp)</label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
-                    <input 
-                      type="number" 
-                      value={formData.salary}
-                      onChange={(e) => setFormData({...formData, salary: e.target.value})}
-                      placeholder="3000000"
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Alamat Rumah</label>
-                <div className="relative">
-                  <MapPin className="absolute left-4 top-3 text-gray-300" size={16} />
-                  <textarea 
-                    value={formData.address}
-                    onChange={(e) => setFormData({...formData, address: e.target.value})}
-                    placeholder="Alamat lengkap..."
-                    rows={2}
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-medium text-gray-700 text-sm"
-                  />
-                </div>
-              </div>
-
-              {formData.role === "Apoteker" && (
+              {/* Dynamic certification fields based on role */}
+              {(formData.role === "APOTEKER" || formData.role === "ASISTEN APOTEKER") && (
                 <div className="p-5 bg-purple-50/50 rounded-[2rem] border border-purple-100 space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
                   <div className="flex items-center gap-2 mb-2">
                     <ShieldCheck size={18} className="text-purple-600" />
-                    <h3 className="text-sm font-black text-gray-900">Sertifikasi Apoteker</h3>
+                    <h3 className="text-sm font-black text-gray-900">Sertifikasi & Izin Profesi</h3>
                   </div>
                   
                   <div className="space-y-1">
@@ -471,28 +407,55 @@ export default function EmployeesPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">STRAP</label>
-                      <input 
-                        type="text" 
-                        value={formData.strap}
-                        onChange={(e) => setFormData({...formData, strap: e.target.value})}
-                        placeholder="No. STRAP..."
-                        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
-                      />
+                  {formData.role === "APOTEKER" && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">STRA (Bukan STRAP)</label>
+                        <input 
+                          type="text" 
+                          value={formData.stra}
+                          onChange={(e) => setFormData({...formData, stra: e.target.value})}
+                          placeholder="No. STRA..."
+                          className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">SIPA</label>
+                        <input 
+                          type="text" 
+                          value={formData.sipa}
+                          onChange={(e) => setFormData({...formData, sipa: e.target.value})}
+                          placeholder="No. SIPA..."
+                          className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">SIPA</label>
-                      <input 
-                        type="text" 
-                        value={formData.sipa}
-                        onChange={(e) => setFormData({...formData, sipa: e.target.value})}
-                        placeholder="No. SIPA..."
-                        className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
-                      />
+                  )}
+
+                  {formData.role === "ASISTEN APOTEKER" && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">STRTTK</label>
+                        <input 
+                          type="text" 
+                          value={formData.strttk}
+                          onChange={(e) => setFormData({...formData, strttk: e.target.value})}
+                          placeholder="No. STRTTK..."
+                          className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">SIPTTK</label>
+                        <input 
+                          type="text" 
+                          value={formData.sipttk}
+                          onChange={(e) => setFormData({...formData, sipttk: e.target.value})}
+                          placeholder="No. SIPTTK..."
+                          className="w-full px-4 py-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none transition font-bold text-gray-700 text-sm"
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 

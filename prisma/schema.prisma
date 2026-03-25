@@ -170,4 +170,7 @@ model Employee {
   serkom    String?
   sipa      String?
   strap     String?
+  sipttk    String?
+  strttk    String?
+  stra      String?
 }
