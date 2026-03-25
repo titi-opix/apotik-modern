@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Package, Plus, Filter, Download, Loader2, Search, X } from "lucide-react";
+import { ArrowLeft, Package, Plus, Filter, Download, Loader2, Search, X, Trash2 } from "lucide-react";
 import KfaSearch from "./KfaSearch";
 
 interface Product {
@@ -144,6 +144,25 @@ export default function InventoryPage() {
       alert("Terjadi kesalahan.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteProduct = async (id: string, name: string) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus produk "${name}"? Semua data stok dan mutasi terkait akan ikut terhapus.`)) return;
+    
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        fetchProducts();
+      } else {
+        const errorData = await res.json();
+        alert(`Gagal menghapus: ${errorData.error}`);
+      }
+    } catch (error) {
+      alert("Terjadi kesalahan saat menghapus produk.");
     }
   };
 
@@ -301,16 +320,28 @@ export default function InventoryPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedProduct(item);
-                              setIsUpdateModalOpen(true);
-                            }}
-                            className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition"
-                          >
-                            Update Stok
-                          </button>
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedProduct(item);
+                                setIsUpdateModalOpen(true);
+                              }}
+                              className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition"
+                            >
+                              Update Stok
+                            </button>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteProduct(item.id, item.name);
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                              title="Hapus Produk"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

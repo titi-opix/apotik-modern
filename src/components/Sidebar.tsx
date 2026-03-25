@@ -23,6 +23,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Inisialisasi Data", href: "/" },
   { icon: Package, label: "Kelola Stok", href: "/inventory" },
   { icon: ShoppingCart, label: "Kasir (POS)", href: "/pos" },
+  { icon: FileText, label: "Riwayat Transaksi", href: "/transactions" },
   { icon: DollarSign, label: "Pengeluaran", href: "/expenses" },
   { icon: FileSpreadsheet, label: "Laporan", href: "/reports" },
   { icon: Truck, label: "Distributor (PBF)", href: "/pbf" },

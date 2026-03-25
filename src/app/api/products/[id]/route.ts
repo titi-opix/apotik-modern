@@ -59,3 +59,29 @@ export async function PATCH(
     return NextResponse.json({ error: error.message || "Failed to restock" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Delete associated data first (Manually since some lack Cascade)
+      await tx.stockMovement.deleteMany({ where: { productId: id } });
+      await tx.transactionItem.deleteMany({ where: { productId: id } });
+      await tx.purchaseOrderItem.deleteMany({ where: { productId: id } });
+      // ProductBatch has Cascade in schema, but being explicit is safer if needed
+      await tx.productBatch.deleteMany({ where: { productId: id } });
+
+      // 2. Delete the product
+      await tx.product.delete({ where: { id } });
+    });
+
+    return NextResponse.json({ message: "Product deleted successfully" });
+  } catch (error: any) {
+    console.error("Delete product failed:", error);
+    return NextResponse.json({ error: error.message || "Failed to delete product" }, { status: 500 });
+  }
+}
